@@ -35,6 +35,8 @@ Bot.on("message", (message) => {
   const arrayBadPeople = util.readBadPeople();
   let flag = 0;
 
+  if (authorId === "697523839390974105") return;
+
   if (
     arrayBadPeople.filter(
       (censoredPeople) => censoredPeople.authorId == authorId
