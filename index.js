@@ -36,6 +36,7 @@ async function messageCensor(message) {
 
 async function messageMuted(message) {
   try {
+    await message.delete();
     return await message.channel.send(
       `[ *${message.author} mutted for bad behavior* ] \n :flag_kp: **축하합니다. 검열하는 동안 할당량이 소진되었습니다. 30 초를 기다려야합니다.** :flag_kp:`,
       { files: ["./images/0657e1cd66b8cf8d6f2e491d7a0142ae.png"] }
