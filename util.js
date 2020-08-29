@@ -1,41 +1,31 @@
 const cron = require("node-cron");
-const fs = require("fs");
+const connection = require("./database");
 
 const util = {};
 
 // Scheduler at every 5 minutes:
 util.scheduler = () => {
-  cron.schedule("*/5 * * * *", () => {
+  cron.schedule("*/1 * * * *", async () => {
     console.log("verifying...");
-    util.verifyBadPeopleTimestamp();
+    await util.verify();
   });
 }; // End Scheduler
 
-// Read JSON Bad_People:
-util.readBadPeople = () => {
-  return JSON.parse(fs.readFileSync("./dictionaries/Bad_People.json"));
-}; // End Read
+util.verify = async () => {
+  const FIVE_MIN = 5 * 60 * 1000;
+  try {
+    badPeople = await connection.all();
 
-// Write JSON Bad_People
-util.writeBadPeople = (people, reset = false) => {
-  let arrayBadPeople;
-
-  if (reset) {
-    arrayBadPeople = people;
-  } else {
-    arrayBadPeople = util.readBadPeople();
-    arrayBadPeople.push(people);
+    for (const person of badPeople) {
+      let dateDiff = new Date() - new Date(person.date);
+      if (dateDiff > FIVE_MIN) {
+        console.log("removing");
+        await connection.remove(person.authorId);
+      }
+    }
+  } catch (e) {
+    console.log("error verifying removing from censorshit");
   }
-
-  return fs.writeFileSync(
-    "./dictionaries/Bad_People.json",
-    JSON.stringify(arrayBadPeople)
-  );
-}; // End Write
-
-// Verify Bad_People Timestamp:
-util.verifyBadPeopleTimestamp = () => {
-  util.writeBadPeople([], true);
-}; // End Verify
+};
 
 module.exports = util;
